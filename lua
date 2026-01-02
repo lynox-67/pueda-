@@ -1,5 +1,5 @@
 -- =========================================================
--- LYNOX AUTO JOIN PREMIUM (LOCAL, SIN BOTS)
+-- LYNOX AUTO JOIN PREMIUM (MANUAL, SIN AUTO EXEC)
 -- =========================================================
 
 -- ===== SERVICIOS =====
@@ -7,22 +7,20 @@ local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local Player = Players.LocalPlayer
 
--- ===== SETTINGS (SESSION) =====
+-- ===== ESTADO =====
 getgenv().LYNOX = getgenv().LYNOX or {
     Running = false,
-    AutoStart = true,
-    MinBrainrotM = 40, -- en MILLONES
+    MinBrainrotM = 40,
     Hops = 0,
     Logs = {}
 }
 
 local LOAD_DELAY = 3
 
--- ===== UI BASE =====
-local gui = Instance.new("ScreenGui")
+-- ===== UI =====
+local gui = Instance.new("ScreenGui", Player.PlayerGui)
 gui.Name = "LynoxAutoJoinUI"
 gui.ResetOnSpawn = false
-gui.Parent = Player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.fromScale(0.32, 0.42)
@@ -32,7 +30,7 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
--- ===== HEADER =====
+-- HEADER
 local header = Instance.new("Frame", frame)
 header.Size = UDim2.fromScale(1,0.14)
 header.BackgroundColor3 = Color3.fromRGB(16,16,16)
@@ -55,7 +53,7 @@ minimizeBtn.TextColor3 = Color3.fromRGB(220,220,220)
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextScaled = true
 
--- ===== BODY =====
+-- BODY
 local body = Instance.new("Frame", frame)
 body.Position = UDim2.fromScale(0,0.14)
 body.Size = UDim2.fromScale(1,0.86)
@@ -76,7 +74,7 @@ hopsLbl.Font = Enum.Font.Gotham
 hopsLbl.TextColor3 = Color3.fromRGB(200,200,200)
 hopsLbl.TextScaled = true
 
--- ===== START / STOP =====
+-- BOTONES
 local startBtn = Instance.new("TextButton", body)
 startBtn.Position = UDim2.fromScale(0.08,0.26)
 startBtn.Size = UDim2.fromScale(0.36,0.16)
@@ -95,85 +93,16 @@ stopBtn.TextColor3 = Color3.new(1,1,1)
 stopBtn.Font = Enum.Font.GothamBold
 stopBtn.TextScaled = true
 
--- ===== SETTINGS =====
-local settingsTitle = Instance.new("TextLabel", body)
-settingsTitle.Position = UDim2.fromScale(0,0.45)
-settingsTitle.Size = UDim2.fromScale(1,0.08)
-settingsTitle.Text = "SETTINGS"
-settingsTitle.TextColor3 = Color3.fromRGB(0,170,255)
-settingsTitle.BackgroundTransparency = 1
-settingsTitle.Font = Enum.Font.GothamBold
-settingsTitle.TextScaled = true
-
--- Slider (Min Brainrot en M)
-local sliderBg = Instance.new("Frame", body)
-sliderBg.Position = UDim2.fromScale(0.08,0.55)
-sliderBg.Size = UDim2.fromScale(0.84,0.06)
-sliderBg.BackgroundColor3 = Color3.fromRGB(35,35,35)
-sliderBg.BorderSizePixel = 0
-
-local sliderFill = Instance.new("Frame", sliderBg)
-sliderFill.Size = UDim2.fromScale(0.4,1)
-sliderFill.BackgroundColor3 = Color3.fromRGB(0,170,255)
-sliderFill.BorderSizePixel = 0
-
-local sliderLabel = Instance.new("TextLabel", body)
-sliderLabel.Position = UDim2.fromScale(0.08,0.62)
-sliderLabel.Size = UDim2.fromScale(0.84,0.08)
-sliderLabel.BackgroundTransparency = 1
-sliderLabel.Font = Enum.Font.Gotham
-sliderLabel.TextColor3 = Color3.fromRGB(220,220,220)
-sliderLabel.TextScaled = true
-
--- AutoStart Toggle
-local autoBtn = Instance.new("TextButton", body)
-autoBtn.Position = UDim2.fromScale(0.08,0.72)
-autoBtn.Size = UDim2.fromScale(0.84,0.1)
-autoBtn.Font = Enum.Font.GothamBold
-autoBtn.TextScaled = true
-
--- ===== LOGS =====
-local logsTitle = Instance.new("TextLabel", body)
-logsTitle.Position = UDim2.fromScale(0,0.84)
-logsTitle.Size = UDim2.fromScale(1,0.08)
-logsTitle.Text = "LOGS (SERVERS)"
-logsTitle.TextColor3 = Color3.fromRGB(0,170,255)
-logsTitle.BackgroundTransparency = 1
-logsTitle.Font = Enum.Font.GothamBold
-logsTitle.TextScaled = true
-
-local logsBox = Instance.new("TextLabel", body)
-logsBox.Position = UDim2.fromScale(0.08,0.92)
-logsBox.Size = UDim2.fromScale(0.84,0.06)
-logsBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
-logsBox.TextColor3 = Color3.fromRGB(200,200,200)
-logsBox.Font = Enum.Font.Gotham
-logsBox.TextScaled = true
-logsBox.TextWrapped = true
-
 -- ===== FUNCIONES =====
 local function updateUI()
     if getgenv().LYNOX.Running then
         status.Text = "STATUS: RUNNING"
         status.TextColor3 = Color3.fromRGB(70,255,120)
-        startBtn.BackgroundColor3 = Color3.fromRGB(30,140,60)
     else
         status.Text = "STATUS: STOPPED"
         status.TextColor3 = Color3.fromRGB(255,80,80)
-        startBtn.BackgroundColor3 = Color3.fromRGB(45,180,70)
     end
-
     hopsLbl.Text = "HOPS: "..getgenv().LYNOX.Hops
-    sliderLabel.Text = "MIN BRAINROT: "..getgenv().LYNOX.MinBrainrotM.."M"
-
-    autoBtn.Text = "AUTO START: "..(getgenv().LYNOX.AutoStart and "ON" or "OFF")
-    autoBtn.BackgroundColor3 = getgenv().LYNOX.AutoStart
-        and Color3.fromRGB(40,150,40)
-        or Color3.fromRGB(120,120,120)
-
-    logsBox.Text = (#getgenv().LYNOX.Logs > 0)
-        and getgenv().LYNOX.Logs[#getgenv().LYNOX.Logs]
-        or "—"
 end
 
 local function findBrainrot()
@@ -191,13 +120,9 @@ local function runAutoJoin()
         task.wait(LOAD_DELAY)
         if not getgenv().LYNOX.Running then return end
 
-        local ok, value = findBrainrot()
-        if ok then
-            table.insert(getgenv().LYNOX.Logs, "FOUND: "..math.floor(value/1_000_000).."M")
-            updateUI()
-        else
+        local ok = findBrainrot()
+        if not ok then
             getgenv().LYNOX.Hops += 1
-            table.insert(getgenv().LYNOX.Logs, "HOP "..getgenv().LYNOX.Hops)
             updateUI()
             TeleportService:Teleport(game.PlaceId, Player)
         end
@@ -216,21 +141,6 @@ stopBtn.MouseButton1Click:Connect(function()
     updateUI()
 end)
 
-autoBtn.MouseButton1Click:Connect(function()
-    getgenv().LYNOX.AutoStart = not getgenv().LYNOX.AutoStart
-    updateUI()
-end)
-
--- Slider input
-sliderBg.InputBegan:Connect(function(i)
-    if i.UserInputType.Name == "MouseButton1" then
-        local x = math.clamp((i.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-        sliderFill.Size = UDim2.fromScale(x,1)
-        getgenv().LYNOX.MinBrainrotM = math.max(10, math.floor(x * 100))
-        updateUI()
-    end
-end)
-
 -- ===== MINIMIZAR =====
 local minimized = false
 local fullSize = frame.Size
@@ -243,10 +153,5 @@ minimizeBtn.MouseButton1Click:Connect(function()
     minimizeBtn.Text = minimized and "+" or "—"
 end)
 
--- ===== AUTO START =====
+-- ===== INIT =====
 updateUI()
-if getgenv().LYNOX.AutoStart then
-    getgenv().LYNOX.Running = true
-    updateUI()
-    runAutoJoin()
-end
